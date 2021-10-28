@@ -18,6 +18,8 @@
 #include "ngraph/op/util/sub_graph_base.hpp"
 #include "perf_counters.hpp"
 
+#include "../../../ngraph/test/util/graph_comparator.hpp"
+
 /* GraphRewrite algorithm:
  * GraphRewrite processes an input graph in an topological order(i.e. args before users)
  * Given the following graph:          Abs2
@@ -131,6 +133,17 @@ bool ov::pass::GraphRewrite::apply_matcher_passes(std::shared_ptr<Function> f,
     // This lambda preforms execution of particular MatcherPass on given node.
     // It automatically handles nodes registered by MatcherPass during transformation and set
     // transformation callback.
+    std::ofstream myLog;
+    myLog.open("/tmp/log", std::ios::app);
+    auto fc = FunctionsComparator::no_default();
+
+    using Cmp = FunctionsComparator::CmpValues;
+    fc.enable(Cmp::CONST_VALUES);
+    fc.enable(Cmp::RUNTIME_KEYS);
+    fc.enable(Cmp::PRECISIONS);
+    fc.enable(Cmp::ATTRIBUTES);
+    fc.enable(Cmp::TENSOR_NAMES);
+
     auto run_matcher_pass = [&](std::shared_ptr<MatcherPass> m_pass, std::shared_ptr<Node> node) -> bool {
         // Keep this property check for backward compatibility. In future transformation property
         // will be deprecated and removed.
@@ -144,7 +157,16 @@ bool ov::pass::GraphRewrite::apply_matcher_passes(std::shared_ptr<Function> f,
 
         // Apply MatcherPass. In case if it returns true no other MatcherPasses will apply
         // to this node
+
+        //
+        auto orig_func = ngraph::clone_function(*f);
         bool status = m_pass->apply(node);
+        //my logging
+        auto res = fc.compare(f,orig_func);
+        if (!res.valid) {
+            myLog << m_pass->get_name() << endl;
+            //std::cout<< m_pass->get_name() << endl;
+        }
 
         // In case if MatcherPass registered nodes they will be added to the beginning of execution
         // queue
@@ -160,6 +182,7 @@ bool ov::pass::GraphRewrite::apply_matcher_passes(std::shared_ptr<Function> f,
         return status;
     };
 
+    myLog.close();
     // list of matchers to run for a node; define here to keep memory allocated
     std::vector<size_t> matcher_passes_to_run;
 
