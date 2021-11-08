@@ -956,7 +956,7 @@ void ov::pass::Manager::run_passes(shared_ptr<ov::Function> func) {
     fc.enable(Cmp::TENSOR_NAMES);
 
     std::ofstream myLog;
-    myLog.open("/tmp/ieFunclog", std::ios::app);
+    myLog.open("/tmp/cpuFunclog", std::ios::app);
 
     for (auto& pass : m_pass_list) {
         if (m_pass_config->is_disabled(pass->get_type_info())) {

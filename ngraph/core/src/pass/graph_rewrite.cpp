@@ -134,7 +134,7 @@ bool ov::pass::GraphRewrite::apply_matcher_passes(std::shared_ptr<Function> f,
     // It automatically handles nodes registered by MatcherPass during transformation and set
     // transformation callback.
     std::ofstream myLog;
-    myLog.open("/tmp/ieFunclog", std::ios::app);
+    myLog.open("/tmp/cpuFunclog", std::ios::app);
     auto fc = FunctionsComparator::no_default();
 
     using Cmp = FunctionsComparator::CmpValues;
