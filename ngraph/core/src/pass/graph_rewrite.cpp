@@ -182,7 +182,7 @@ bool ov::pass::GraphRewrite::apply_matcher_passes(std::shared_ptr<Function> f,
         return status;
     };
 
-
+    myLog.close();
 
     // list of matchers to run for a node; define here to keep memory allocated
     std::vector<size_t> matcher_passes_to_run;
